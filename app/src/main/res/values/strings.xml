@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">KoinApp</string>
+    <string name="welcome_page_one_title">Покупка и продажа</string>
+    <string name="welcome_page_one_subtitle">Покупай когда дешево, продавай когда дорого.</string>
+    <string name="welcome_page_two_title">Курс криптовалют</string>
+    <string name="welcome_page_two_subtitle">Следи за курсом валют и вовремя реагируй на изменения динамики цены.</string>
+    <string name="welcome_page_three_title">Конвертер валют</string>
+    <string name="welcome_page_three_subtitle">Узнай сколько эфира в одном биткоине.</string>
+    <string name="welcome_button">Начать работу</string>
+    <string name="wallets_label">Кошельки</string>
+    <string name="rates_label">Курс</string>
+    <string name="converter_label">Конвертер</string>
+</resources>
