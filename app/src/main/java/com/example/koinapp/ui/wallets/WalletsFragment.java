@@ -59,6 +59,7 @@ public class WalletsFragment extends Fragment {
             final int centerX = (recyclerView.getLeft() + recyclerView.getRight()) / 2;
             for (int i = 0; i < recyclerView.getChildCount(); i++) {
                 final View child = recyclerView.getChildAt(i);
+
                 final int childCenterX = (child.getLeft() + child.getRight()) / 2;
                 final float childOffset = Math.abs(centerX - childCenterX) / (float) centerX;
                 float factor = (float) Math.pow(0.85, childOffset);
