@@ -22,5 +22,10 @@
         android:name="com.example.koinapp.ui.converter.ConverterFragment"
         android:label="@string/converter_label"
         tools:layout="@layout/fmt_converter" />
+    <dialog
+        android:id="@+id/currency_dialog"
+        android:name="com.example.koinapp.ui.currency.CurrencyDialog"
+        android:label="CurrencyDialog"
+        tools:layout="@layout/d_currency" />
 
 </navigation>

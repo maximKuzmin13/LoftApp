@@ -10,4 +10,9 @@
     <string name="wallets_label">Кошельки</string>
     <string name="rates_label">Курс</string>
     <string name="converter_label">Конвертер</string>
+    <string name="currency_text">Выбор Валюты</string>
+    <string name="sort_text">Сортировать</string>
+    <string name="usd">Доллар</string>
+    <string name="eur">Евро</string>
+    <string name="rub">Рубль</string>
 </resources>
