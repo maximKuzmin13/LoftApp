@@ -1,9 +1,11 @@
-package com.example.koinapp.ui;
+package com.example.koinapp;
 
 import android.app.Application;
 import android.os.StrictMode;
 
-import com.example.koinapp.BuildConfig;
+import com.example.koinapp.util.DebugTree;
+
+import timber.log.Timber;
 
 public class KoinApp extends Application {
     @Override
@@ -11,6 +13,7 @@ public class KoinApp extends Application {
         super.onCreate();
         if (BuildConfig.DEBUG) {
             StrictMode.enableDefaults();
+            Timber.plant(new DebugTree());
         }
     }
 

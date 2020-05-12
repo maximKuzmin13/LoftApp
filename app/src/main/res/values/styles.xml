@@ -3,6 +3,8 @@
     <attr name="walletCardBackground" format="color|reference" />
     <attr name="walletCardWidth" format="dimension|reference" />
     <attr name="walletCardHeight" format="dimension|reference" />
+    <attr name="percentPlus" format="color|reference" />
+    <attr name="percentMinus" format="color|reference" />
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
@@ -23,8 +25,14 @@
         <item name="actionBarTheme">@style/AppTheme.AppBarOverlay</item>
         <item name="actionBarPopupTheme">@style/AppTheme.PopupOverlay</item>
         <item name="bottomNavigationStyle">@style/AppTheme.BottomNavigationView</item>
+        <item name="percentPlus">@color/weird_green</item>
+        <item name="percentMinus">@color/watermelon</item>
+        <item name="materialAlertDialogTheme">@style/AppTheme.AlertDialog</item>
     </style>
 
+    <style name="AppTheme.AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/dark_four</item>
+    </style>
     <style name="Widget.AppTheme.Button.Welcome" parent="Widget.MaterialComponents.TextView">
         <item name="android:gravity">center</item>
         <item name="android:paddingStart">64dp</item>
