@@ -63,5 +63,4 @@ class CurrencyAdapter extends ListAdapter<Currency, CurrencyAdapter.ViewHolder> 
             this.binding = binding;
         }
     }
-
 }

@@ -11,7 +11,15 @@ import androidx.fragment.app.Fragment;
 
 import com.example.koinapp.R;
 
+import javax.inject.Inject;
+
 public class ConverterFragment extends Fragment {
+
+    @Inject
+    public ConverterFragment() {
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

@@ -1,10 +1,13 @@
 package com.example.koinapp.data;
 
+import androidx.annotation.NonNull;
+
 import com.google.auto.value.AutoValue;
 
 @AutoValue
 public abstract class Currency {
 
+    @NonNull
     static Currency create(String symbol, String code, String name) {
         return new AutoValue_Currency(symbol, code, name);
     }

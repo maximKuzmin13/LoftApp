@@ -9,11 +9,14 @@ import com.example.koinapp.data.CurrencyRepository;
 
 import java.util.List;
 
-public class CurrencyViewModel extends ViewModel {
+import javax.inject.Inject;
+
+class CurrencyViewModel extends ViewModel {
 
     private final CurrencyRepository repository;
 
-    public CurrencyViewModel(CurrencyRepository repository) {
+    @Inject
+    CurrencyViewModel(CurrencyRepository repository) {
         this.repository = repository;
     }
 

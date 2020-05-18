@@ -15,12 +15,15 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.koinapp.BaseComponent;
 import com.example.koinapp.R;
 import com.example.koinapp.databinding.FmtRatesBinding;
-import com.example.koinapp.util.ChangeFormatter;
-import com.example.koinapp.util.PriceFormatter;
+
+import javax.inject.Inject;
 
 public class RatesFragment extends Fragment {
+
+    private final RatesComponent component;
 
     private FmtRatesBinding binding;
 
@@ -28,12 +31,19 @@ public class RatesFragment extends Fragment {
 
     private RatesViewModel viewModel;
 
+    @Inject
+    RatesFragment(BaseComponent baseComponent) {
+        component = DaggerRatesComponent.builder()
+                .baseComponent(baseComponent)
+                .build();
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(RatesViewModel.class);
-        adapter = new RatesAdapter(new PriceFormatter(), new ChangeFormatter());
+        viewModel = new ViewModelProvider(this, component.viewModelFactory())
+                .get(RatesViewModel.class);
+        adapter = component.ratesAdapter();
     }
 
     @Nullable
@@ -48,8 +58,9 @@ public class RatesFragment extends Fragment {
         setHasOptionsMenu(true);
         binding = FmtRatesBinding.bind(view);
         binding.rvRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        binding.rvRates.swapAdapter(adapter, false);
+        binding.rvRates.setAdapter(adapter);
         binding.rvRates.setHasFixedSize(true);
+        binding.refresh.setOnRefreshListener(viewModel::refresh);
         viewModel.coins().observe(getViewLifecycleOwner(), adapter::submitList);
         viewModel.isRefreshing().observe(getViewLifecycleOwner(), binding.refresh::setRefreshing);
     }
@@ -64,6 +75,9 @@ public class RatesFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (R.id.currency_dialog == item.getItemId()) {
             NavHostFragment.findNavController(this).navigate(R.id.currency_dialog);
+            return true;
+        } else if (R.id.sort_dialog == item.getItemId()) {
+            viewModel.switchSortingOrder();
             return true;
         }
         return super.onOptionsItemSelected(item);

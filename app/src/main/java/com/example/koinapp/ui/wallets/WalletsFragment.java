@@ -18,9 +18,16 @@ import androidx.recyclerview.widget.SnapHelper;
 import com.example.koinapp.R;
 import com.example.koinapp.databinding.FmtWalletsBinding;
 
+import javax.inject.Inject;
+
 public class WalletsFragment extends Fragment {
 
     private SnapHelper walletSnapHelper;
+
+    @Inject
+    public WalletsFragment() {
+
+    }
 
     @Nullable
     @Override
