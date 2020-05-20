@@ -26,7 +26,7 @@ public class CoinReposytoryImpl implements CoinReposytory {
     private final ExecutorService executor;
 
     @Inject
-    public CoinReposytoryImpl(CoinService api, KoinDatabase db, ExecutorService executor) {
+    CoinReposytoryImpl(CoinService api, KoinDatabase db, ExecutorService executor) {
         this.api = api;
         this.db = db;
         this.executor = executor;
