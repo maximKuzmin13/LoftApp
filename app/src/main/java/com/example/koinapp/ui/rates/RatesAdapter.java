@@ -15,21 +15,27 @@ import com.example.koinapp.BuildConfig;
 import com.example.koinapp.R;
 import com.example.koinapp.data.Coin;
 import com.example.koinapp.databinding.ItemRatesBinding;
-import com.example.koinapp.util.Formatter;
+import com.example.koinapp.util.ChangeFormatter;
+import com.example.koinapp.util.ImageLoader;
 import com.example.koinapp.util.OutlineCircle;
-import com.squareup.picasso.Picasso;
+import com.example.koinapp.util.PriceFormatter;
 
+import java.util.List;
 import java.util.Objects;
+
+import javax.inject.Inject;
 
 public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
     private int percentPlus = Color.GREEN;
     private int percentMinus = Color.RED;
-    private final Formatter<Double> priceFormatter;
-    private final Formatter<Double> changeFormatter;
+    private final PriceFormatter priceFormatter;
+    private final ChangeFormatter changeFormatter;
+    private final ImageLoader imageLoader;
 
     private LayoutInflater inflater;
 
-    RatesAdapter(Formatter<Double> priceFormatter, Formatter<Double> changeFormatter) {
+    @Inject
+    RatesAdapter(PriceFormatter priceFormatter, ChangeFormatter changeFormatter, ImageLoader imageLoader) {
         super(new DiffUtil.ItemCallback<Coin>() {
             @Override
             public boolean areItemsTheSame(@NonNull Coin oldItem, @NonNull Coin newItem) {
@@ -40,9 +46,15 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
             public boolean areContentsTheSame(@NonNull Coin oldItem, @NonNull Coin newItem) {
                 return Objects.equals(oldItem, newItem);
             }
+
+            @Override
+            public Object getChangePayload(@NonNull Coin oldItem, @NonNull Coin newItem) {
+                return newItem;
+            }
         });
         this.priceFormatter = priceFormatter;
         this.changeFormatter = changeFormatter;
+        this.imageLoader = imageLoader;
         setHasStableIds(true);
     }
 
@@ -53,17 +65,28 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
     }
 
     @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position);
+        } else {
+            final Coin coin = (Coin) payloads.get(0);
+            holder.binding.tvPrice.setText(priceFormatter.format(coin.currencyCode(), coin.price()));
+            holder.binding.tvPriceChange.setText(changeFormatter.format(coin.change24h()));
+        }
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final Coin coin = getItem(position);
-        holder.binding.symbol.setText(getItem(position).symbol());
-        holder.binding.tvPrice.setText(priceFormatter.format(coin.price()));
+        holder.binding.symbol.setText(coin.symbol());
+        holder.binding.tvPrice.setText(priceFormatter.format(coin.currencyCode(), coin.price()));
         holder.binding.tvPriceChange.setText(changeFormatter.format(coin.change24h()));
         if (coin.change24h() > 0) {
             holder.binding.tvPriceChange.setTextColor(percentPlus);
         } else {
             holder.binding.tvPriceChange.setTextColor(percentMinus);
         }
-        Picasso.get()
+        imageLoader
                 .load(BuildConfig.IMG_ENDPOINT + coin.id() + ".png")
                 .into(holder.binding.coinIcon);
     }
@@ -79,13 +102,14 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
         final Context context = recyclerView.getContext();
         inflater = LayoutInflater.from(context);
         TypedValue v = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.percentPlus, v, true);
-        percentPlus = v.data;
         context.getTheme().resolveAttribute(R.attr.percentMinus, v, true);
         percentMinus = v.data;
+        context.getTheme().resolveAttribute(R.attr.percentPlus, v, true);
+        percentPlus = v.data;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+
         private final ItemRatesBinding binding;
 
         public ViewHolder(@NonNull ItemRatesBinding binding) {

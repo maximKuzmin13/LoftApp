@@ -4,7 +4,17 @@ import androidx.annotation.NonNull;
 
 import java.util.Locale;
 
-public class ChangeFormatter<T> implements Formatter<Double> {
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+public class ChangeFormatter implements Formatter<Double> {
+
+    @Inject
+    ChangeFormatter() {
+
+    }
+
     @NonNull
     @Override
     public String format(@NonNull Double value) {

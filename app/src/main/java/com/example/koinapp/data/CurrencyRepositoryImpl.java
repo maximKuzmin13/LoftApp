@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 public class CurrencyRepositoryImpl implements CurrencyRepository {
 
     private final Map<String, Currency> avaliableCurrencies = new HashMap<>();
@@ -23,7 +25,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
 
     private static final String KEY_CURRENCY = "currency";
 
-
+    @Inject
     public CurrencyRepositoryImpl(@NonNull Context context) {
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
         avaliableCurrencies.put("USD", Currency.create("$", "USD", context.getString(R.string.usd)));

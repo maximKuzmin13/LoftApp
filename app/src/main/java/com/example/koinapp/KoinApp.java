@@ -8,6 +8,9 @@ import com.example.koinapp.util.DebugTree;
 import timber.log.Timber;
 
 public class KoinApp extends Application {
+
+    BaseComponent component;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -15,6 +18,13 @@ public class KoinApp extends Application {
             StrictMode.enableDefaults();
             Timber.plant(new DebugTree());
         }
+        component = DaggerDaggerComponent.builder()
+                .application(this)
+                .build();
+    }
+
+    public BaseComponent getComponent() {
+        return component;
     }
 
 }
