@@ -21,7 +21,11 @@ import com.example.koinapp.databinding.FmtRatesBinding;
 
 import javax.inject.Inject;
 
+import io.reactivex.disposables.CompositeDisposable;
+
 public class RatesFragment extends Fragment {
+
+    private final CompositeDisposable disposable = new CompositeDisposable();
 
     private final RatesComponent component;
 
@@ -61,8 +65,9 @@ public class RatesFragment extends Fragment {
         binding.rvRates.setAdapter(adapter);
         binding.rvRates.setHasFixedSize(true);
         binding.refresh.setOnRefreshListener(viewModel::refresh);
-        viewModel.coins().observe(getViewLifecycleOwner(), adapter::submitList);
-        viewModel.isRefreshing().observe(getViewLifecycleOwner(), binding.refresh::setRefreshing);
+        disposable.add(viewModel.coins().subscribe(adapter::submitList));
+        disposable.add(viewModel.isRefreshing().subscribe(binding.refresh::setRefreshing));
+
     }
 
     @Override
@@ -85,7 +90,8 @@ public class RatesFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        binding.rvRates.swapAdapter(null, false);
+        binding.rvRates.setAdapter(null);
+        disposable.clear();
         super.onDestroyView();
     }
 

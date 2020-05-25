@@ -1,16 +1,21 @@
 package com.example.koinapp.data;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
 
 import com.google.auto.value.AutoValue;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
+
 public interface CoinReposytory {
 
     @NonNull
-    LiveData<List<Coin>> listings(@NonNull Query query);
+    Observable<List<Coin>> listings(@NonNull Query query);
+
+    @NonNull
+    Single<Coin> coin(@NonNull Currency currency, long id);
 
     @AutoValue
     abstract class Query {

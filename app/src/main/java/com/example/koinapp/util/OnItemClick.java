@@ -8,6 +8,7 @@ import android.view.ViewConfiguration;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+
 public class OnItemClick implements RecyclerView.OnItemTouchListener {
 
     private final View.OnClickListener listener;
