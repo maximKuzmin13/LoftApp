@@ -2,11 +2,11 @@ package com.example.koinapp.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
 
 import com.example.koinapp.R;
 
@@ -16,7 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+import io.reactivex.Observable;
+
+@Singleton
 public class CurrencyRepositoryImpl implements CurrencyRepository {
 
     private final Map<String, Currency> avaliableCurrencies = new HashMap<>();
@@ -26,7 +30,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
     private static final String KEY_CURRENCY = "currency";
 
     @Inject
-    public CurrencyRepositoryImpl(@NonNull Context context) {
+    CurrencyRepositoryImpl(@NonNull Context context) {
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
         avaliableCurrencies.put("USD", Currency.create("$", "USD", context.getString(R.string.usd)));
         avaliableCurrencies.put("EUR", Currency.create("E", "EUR", context.getString(R.string.eur)));
@@ -43,33 +47,22 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
 
     @NonNull
     @Override
-    public LiveData<Currency> currency() {
-        return new CurrencyLiveData();
+    public Observable<Currency> currency() {
+        return Observable.create(emitter -> {
+            SharedPreferences.OnSharedPreferenceChangeListener listener = (preferences, key) -> {
+                if (!emitter.isDisposed() && KEY_CURRENCY.equals(key)) {
+                    emitter.onNext(avaliableCurrencies.get(preferences.getString(key, "USD")));
+                }
+            };
+            preferences.registerOnSharedPreferenceChangeListener(listener);
+            emitter.setCancellable(() -> preferences.unregisterOnSharedPreferenceChangeListener(listener));
+            emitter.onNext(avaliableCurrencies.get(preferences.getString(KEY_CURRENCY, "USD")));
+        });
     }
 
     @Override
     public void updateCurrency(@NonNull Currency currency) {
         preferences.edit().putString(KEY_CURRENCY, currency.code()).apply();
-    }
-
-    private class CurrencyLiveData extends LiveData<Currency> implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-
-        @Override
-        protected void onActive() {
-            preferences.registerOnSharedPreferenceChangeListener(this);
-            setValue(avaliableCurrencies.get(preferences.getString(KEY_CURRENCY, "USD")));
-        }
-
-        @Override
-        protected void onInactive() {
-            preferences.unregisterOnSharedPreferenceChangeListener(this);
-        }
-
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            setValue(avaliableCurrencies.get(prefs.getString(key, "USD")));
-        }
     }
 
 }

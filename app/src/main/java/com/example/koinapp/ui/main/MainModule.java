@@ -3,6 +3,7 @@ package com.example.koinapp.ui.main;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentFactory;
 
+import com.example.koinapp.ui.converter.ConverterDialog;
 import com.example.koinapp.ui.converter.ConverterFragment;
 import com.example.koinapp.ui.currency.CurrencyDialog;
 import com.example.koinapp.ui.rates.RatesFragment;
@@ -39,4 +40,9 @@ abstract class MainModule {
     @IntoMap
     @ClassKey(CurrencyDialog.class)
     abstract Fragment currencyDialog(CurrencyDialog impl);
+
+    @Binds
+    @IntoMap
+    @ClassKey(ConverterDialog.class)
+    abstract Fragment converterDialog(ConverterDialog impl);
 }

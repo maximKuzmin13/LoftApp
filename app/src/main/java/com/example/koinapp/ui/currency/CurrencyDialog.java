@@ -30,8 +30,6 @@ public class CurrencyDialog extends AppCompatDialogFragment {
 
     private OnItemClick onItemClick;
 
-//    private CurrencyRepository repository;
-
     @Inject
     CurrencyDialog(BaseComponent baseComponent) {
         component = DaggerCurrencyComponent.builder()
@@ -62,6 +60,7 @@ public class CurrencyDialog extends AppCompatDialogFragment {
         super.onActivityCreated(savedInstanceState);
         binding.recyclerCurrency.setLayoutManager(new LinearLayoutManager(requireActivity()));
         binding.recyclerCurrency.setAdapter(adapter);
+
         viewModel.allCurrencies().observe(this, adapter::submitList);
         onItemClick = new OnItemClick((v) -> {
             final RecyclerView.ViewHolder viewHolder = binding.recyclerCurrency.findContainingViewHolder(v);

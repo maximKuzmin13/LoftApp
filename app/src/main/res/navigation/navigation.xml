@@ -27,5 +27,10 @@
         android:name="com.example.koinapp.ui.currency.CurrencyDialog"
         android:label="CurrencyDialog"
         tools:layout="@layout/d_currency" />
+    <dialog
+        android:id="@+id/converter_dialog"
+        android:name="com.example.koinapp.ui.converter.ConverterDialog"
+        android:label="@string/choose_currency"
+        tools:layout="@layout/d_currency" />
 
 </navigation>

@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import timber.log.Timber;
+
 public class CoinFragmentFactory extends FragmentFactory {
 
     private final Map<Class<?>, Provider<Fragment>> providers;
@@ -27,9 +29,8 @@ public class CoinFragmentFactory extends FragmentFactory {
             if (provider != null) {
                 return provider.get();
             }
-
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Timber.e(e);
         }
         return super.instantiate(classLoader, className);
     }

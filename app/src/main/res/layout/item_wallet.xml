@@ -6,6 +6,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/bg_wallet_card">
 
+    <ImageView
+        android:id="@+id/iv_wallet_logo"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@id/guideline_top"
         android:layout_width="wrap_content"
@@ -28,5 +38,35 @@
         app:layout_constraintEnd_toStartOf="@+id/guideline_left"
         app:layout_constraintTop_toBottomOf="@+id/guideline_top"
         tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/tv_coin_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_wallet_logo"
+        app:layout_constraintStart_toEndOf="@+id/iv_wallet_logo"
+        app:layout_constraintTop_toTopOf="@+id/iv_wallet_logo" />
+
+    <TextView
+        android:id="@+id/tv_currency_wallet2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="27dp"
+        android:layout_marginBottom="24dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_currency_wallet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="26dp"
+        android:layout_marginBottom="6dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/tv_currency_wallet2"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

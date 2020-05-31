@@ -1,19 +1,18 @@
 package com.example.koinapp.data;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Transformations;
 
-import java.io.IOException;
+import com.example.koinapp.util.RxShedulers;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import okhttp3.ResponseBody;
-import retrofit2.Response;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import timber.log.Timber;
 
 @Singleton
@@ -23,58 +22,68 @@ public class CoinReposytoryImpl implements CoinReposytory {
 
     private final KoinDatabase db;
 
-    private final ExecutorService executor;
+    private final RxShedulers shedulers;
 
     @Inject
-    CoinReposytoryImpl(CoinService api, KoinDatabase db, ExecutorService executor) {
+    CoinReposytoryImpl(CoinService api, KoinDatabase db, RxShedulers shedulers) {
         this.api = api;
         this.db = db;
-        this.executor = executor;
+        this.shedulers = shedulers;
     }
 
     @NonNull
     @Override
-    public LiveData<List<Coin>> listings(@NonNull Query query) {
-        fetchFromNetwork(query);
-        return fetchFromDb(query);
+    public Observable<List<Coin>> listings(@NonNull Query query) {
+        return Observable
+                .fromCallable(() -> query.forceUpdate() || db.coins().coinsCount() == 0)
+                .switchMap((f) -> f ? api.listings(query.currency()) : Observable.empty())
+                .map((listings) -> mapToRoomCoins(query, listings.data()))
+                .doOnNext((coins) -> db.coins().insert(coins))
+                .switchMap((coins) -> fetchFromDb(query))
+                .switchIfEmpty(fetchFromDb(query))
+                .<List<Coin>>map(Collections::unmodifiableList)
+                .subscribeOn(shedulers.io());
     }
 
-    private LiveData<List<Coin>> fetchFromDb(Query query) {
-        LiveData<List<RoomCoin>> coins;
+    @NonNull
+    @Override
+    public Single<Coin> coin(@NonNull Currency currency, long id) {
+        return listings(Query.builder().currency(currency.code()).forceUpdate(false).build())
+                .firstOrError()
+                .flatMap((coins) -> db.coins().fetchOne(id))
+                .map((coin) -> coin);
+    }
+
+    @NonNull
+    @Override
+    public Single<Coin> nextPopularCoin(@NonNull Currency currency, List<Integer> ids) {
+        return listings(Query.builder().currency(currency.code()).forceUpdate(false).build())
+                .firstOrError()
+                .doOnSuccess((c) -> Timber.d("%s", c.size()))
+                .flatMap((coins) -> db.coins().nextPopularCoin(ids))
+                .map((coin) -> coin);
+    }
+
+
+    @NonNull
+    @Override
+    public Observable<List<Coin>> topCoins(@NonNull Currency currency) {
+        return listings(Query.builder().currency(currency.code()).forceUpdate(false).build())
+                .switchMap((coins) -> db.coins().fetchTop(3))
+                .map(Collections::unmodifiableList);
+    }
+
+    private Observable<List<RoomCoin>> fetchFromDb(Query query) {
         if (query.sortBy() == SortBy.PRICE) {
-            coins = db.coins().fetchAllSortByPrice();
+            return db.coins().fetchAllSortByPrice();
         } else {
-            coins = db.coins().fetchAllSortByRank();
+            return db.coins().fetchAllSortByRank();
         }
-        return Transformations.map(coins, ArrayList::new);
     }
 
-    private void fetchFromNetwork(Query query) {
-        executor.submit(() -> {
-            if (query.forceUpdate() || db.coins().coinsCount() == 0) {
-                try {
-                    final Response<Listings> response = api.listings(query.currency()).execute();
-                    if (response.isSuccessful()) {
-                        final Listings listings = response.body();
-                        if (listings != null) {
-                            saveCoinsIntoDb(query, listings.data());
-                        }
-                    } else {
-                        final ResponseBody responseBody = response.errorBody();
-                        if (responseBody != null) {
-                            throw new IOException(responseBody.string());
-                        }
-                    }
-                } catch (IOException e) {
-                    Timber.e(e);
-                }
-            }
-        });
-    }
-
-    private void saveCoinsIntoDb(Query query, List<? extends Coin> coins) {
-        List<RoomCoin> roomCoins = new ArrayList<>(coins.size());
-        for (Coin coin : coins) {
+    private List<RoomCoin> mapToRoomCoins(Query query, List<? extends Coin> data) {
+        List<RoomCoin> roomCoins = new ArrayList<>(data.size());
+        for (Coin coin : data) {
             roomCoins.add(RoomCoin.create(
                     coin.name(),
                     coin.symbol(),
@@ -85,7 +94,6 @@ public class CoinReposytoryImpl implements CoinReposytory {
                     coin.id()
             ));
         }
-        db.coins().insert(roomCoins);
+        return roomCoins;
     }
-
 }

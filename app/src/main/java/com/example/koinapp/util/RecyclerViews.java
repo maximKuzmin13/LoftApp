@@ -1,54 +1,51 @@
 package com.example.koinapp.util;
 
-import android.content.Context;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
+
+import io.reactivex.Observable;
+import io.reactivex.android.MainThreadDisposable;
 
 public class RecyclerViews {
 
-    public static void onItemClick(@NonNull RecyclerView rv, @NonNull View.OnClickListener listener) {
-        rv.addOnItemTouchListener(new ClickHelper(rv.getContext(), listener));
+    @NonNull
+    public static Observable<Integer> onSnap(@NonNull RecyclerView rv, @NonNull SnapHelper helper) {
+        return Observable.create((emitter) -> {
+            MainThreadDisposable.verifyMainThread();
+            final RecyclerView.OnScrollListener listener = new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if (RecyclerView.SCROLL_STATE_IDLE == newState) {
+                        final View snapView = helper.findSnapView(rv.getLayoutManager());
+                        if (snapView != null) {
+                            final RecyclerView.ViewHolder holder = rv.findContainingViewHolder(snapView);
+                            if (holder != null) {
+                                emitter.onNext(holder.getAdapterPosition());
+                            }
+                        }
+                    }
+                }
+            };
+            emitter.setCancellable(() -> rv.removeOnScrollListener(listener));
+            rv.addOnScrollListener(listener);
+        });
     }
 
-    private static class ClickHelper implements RecyclerView.OnItemTouchListener {
-
-        private final GestureDetectorCompat gestureDetectorCompat;
-        @NonNull
-        private final View.OnClickListener listener;
-
-        ClickHelper(@NonNull Context context, @NonNull View.OnClickListener listener) {
-            this.gestureDetectorCompat = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onSingleTapUp(MotionEvent e) {
-                    return true;
+    @NonNull
+    public static Observable<Integer> onClick(@NonNull RecyclerView rv) {
+        return Observable.create((emitter) -> {
+            MainThreadDisposable.verifyMainThread();
+            final RecyclerView.OnItemTouchListener listener = new OnItemClick((v) -> {
+                final RecyclerView.ViewHolder holder = rv.findContainingViewHolder(v);
+                if (holder != null) {
+                    emitter.onNext(holder.getAdapterPosition());
                 }
             });
-            this.listener = listener;
-        }
-
-        @Override
-        public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-            final View view = rv.findChildViewUnder(e.getX(), e.getY());
-            if (view != null && gestureDetectorCompat.onTouchEvent(e)) {
-                listener.onClick(view);
-            }
-
-            return false;
-        }
-
-        @Override
-        public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-
-        }
-
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-        }
+            emitter.setCancellable(() -> rv.removeOnItemTouchListener(listener));
+            rv.addOnItemTouchListener(listener);
+        });
     }
 }
