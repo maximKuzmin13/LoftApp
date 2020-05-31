@@ -38,12 +38,12 @@ class CurrencyAdapter extends ListAdapter<Currency, CurrencyAdapter.ViewHolder> 
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(ItemCurrencyBinding.inflate(inflater, parent, false));
+    public CurrencyAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new CurrencyAdapter.ViewHolder(ItemCurrencyBinding.inflate(inflater, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CurrencyAdapter.ViewHolder holder, int position) {
         final Currency currency = getItem(position);
         holder.binding.name.setText(currency.name());
         holder.binding.symbol.setText(currency.symbol());

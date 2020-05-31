@@ -14,10 +14,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.koinapp.BaseComponent;
 import com.example.koinapp.R;
 import com.example.koinapp.databinding.FmtRatesBinding;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -29,11 +33,11 @@ public class RatesFragment extends Fragment {
 
     private final RatesComponent component;
 
-    private FmtRatesBinding binding;
-
     private RatesAdapter adapter;
 
     private RatesViewModel viewModel;
+
+    private RecyclerView recyclerView;
 
     @Inject
     RatesFragment(BaseComponent baseComponent) {
@@ -60,14 +64,18 @@ public class RatesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
-        binding = FmtRatesBinding.bind(view);
-        binding.rvRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        binding.rvRates.setAdapter(adapter);
-        binding.rvRates.setHasFixedSize(true);
+        recyclerView = view.findViewById(R.id.rv_rates);
+        com.example.koinapp.databinding.FmtRatesBinding binding = FmtRatesBinding.bind(view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        recyclerView.setAdapter(adapter);
+        recyclerView.setHasFixedSize(true);
         binding.refresh.setOnRefreshListener(viewModel::refresh);
         disposable.add(viewModel.coins().subscribe(adapter::submitList));
         disposable.add(viewModel.isRefreshing().subscribe(binding.refresh::setRefreshing));
-
+        disposable.add(viewModel.onError().subscribe(e ->
+                Snackbar.make(view, Objects.requireNonNull(e.getMessage()), Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Retry", v -> viewModel.retry())
+                        .show()));
     }
 
     @Override
@@ -90,7 +98,7 @@ public class RatesFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        binding.rvRates.setAdapter(null);
+        recyclerView.setAdapter(null);
         disposable.clear();
         super.onDestroyView();
     }

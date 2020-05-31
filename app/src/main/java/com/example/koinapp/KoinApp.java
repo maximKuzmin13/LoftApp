@@ -10,7 +10,7 @@ import timber.log.Timber;
 
 public class KoinApp extends Application {
 
-    BaseComponent component;
+    private BaseComponent component;
 
     @Override
     public void onCreate() {
@@ -23,9 +23,8 @@ public class KoinApp extends Application {
                 .application(this)
                 .build();
 
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
-            Timber.d("fcm: %s", instanceIdResult.getToken());
-        });
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult ->
+                Timber.d("fcm: %s", instanceIdResult.getToken()));
     }
 
 

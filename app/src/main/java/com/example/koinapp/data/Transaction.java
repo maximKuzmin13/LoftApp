@@ -6,6 +6,12 @@ import java.util.Date;
 
 @AutoValue
 public abstract class Transaction {
+    public static Transaction create(String uid,
+                                     Coin coin,
+                                     double amount,
+                                     Date createdAt) {
+        return new AutoValue_Transaction(uid, coin, amount, createdAt);
+    }
 
     public abstract String uid();
 

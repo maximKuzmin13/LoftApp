@@ -20,8 +20,6 @@ import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity {
 
-    private MainComponent component;
-
     @Inject
     FragmentFactory fragmentFactory;
 
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
         final BaseComponent baseComponent = ((KoinApp) newBase.getApplicationContext()).getComponent();
-        component = DaggerMainComponent.builder().baseComponent(baseComponent).build();
+        MainComponent component = DaggerMainComponent.builder().baseComponent(baseComponent).build();
         component.inject(this);
     }
 

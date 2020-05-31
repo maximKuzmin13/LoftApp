@@ -22,6 +22,6 @@ abstract class WalletsComponent {
 
     abstract WalletAdapter walletAdapter();
 
-//    abstract TransactionsAdapter transactionsAdapter();
+    abstract TransactionsAdapter transactionsAdapter();
 
 }

@@ -17,17 +17,24 @@ public interface CoinReposytory {
     @NonNull
     Single<Coin> coin(@NonNull Currency currency, long id);
 
+    @NonNull
+    Single<Coin> nextPopularCoin(@NonNull Currency currency, List<Integer> ids);
+
+    @NonNull
+    Observable<List<Coin>> topCoins(@NonNull Currency currency);
+
     @AutoValue
     abstract class Query {
         @NonNull
         public static Builder builder() {
             return new AutoValue_CoinReposytory_Query.Builder()
-                    .forceUpdate(true);
+                    .forceUpdate(true)
+                    .sortBy(SortBy.RANK);
         }
 
         abstract String currency();
 
-        abstract boolean forceUpdate();
+        public abstract boolean forceUpdate();
 
         abstract SortBy sortBy();
 

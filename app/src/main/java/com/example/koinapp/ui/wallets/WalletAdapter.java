@@ -8,10 +8,12 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.koinapp.BuildConfig;
 import com.example.koinapp.data.Wallet;
 import com.example.koinapp.databinding.ItemWalletBinding;
-import com.example.koinapp.util.ChangeFormatter;
+import com.example.koinapp.util.BalanceFormatter;
 import com.example.koinapp.util.ImageLoader;
+import com.example.koinapp.util.OutlineCircle;
 import com.example.koinapp.util.PriceFormatter;
 
 import java.util.Objects;
@@ -19,15 +21,16 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 class WalletAdapter extends ListAdapter<Wallet, WalletAdapter.ViewHolder> {
-    private LayoutInflater inflater;
     private final PriceFormatter priceFormatter;
 
-    private final ChangeFormatter changeFormatter;
+    private final BalanceFormatter balanceFormatter;
 
     private final ImageLoader imageLoader;
 
+    private LayoutInflater inflater;
+
     @Inject
-    public WalletAdapter(PriceFormatter priceFormatter, ChangeFormatter changeFormatter, ImageLoader imageLoader) {
+    WalletAdapter(PriceFormatter priceFormatter, BalanceFormatter balanceFormatter, ImageLoader imageLoader) {
         super(new DiffUtil.ItemCallback<Wallet>() {
             @Override
             public boolean areItemsTheSame(@NonNull Wallet oldItem, @NonNull Wallet newItem) {
@@ -40,42 +43,46 @@ class WalletAdapter extends ListAdapter<Wallet, WalletAdapter.ViewHolder> {
             }
         });
         this.priceFormatter = priceFormatter;
-        this.changeFormatter = changeFormatter;
+        this.balanceFormatter = balanceFormatter;
         this.imageLoader = imageLoader;
     }
 
-
     @NonNull
     @Override
-    public WalletAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        return new WalletAdapter.ViewHolder(ItemWalletBinding.inflate(inflater, parent, false));
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(ItemWalletBinding.inflate(inflater, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull WalletAdapter.ViewHolder holder, int position) {
-
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final Wallet wallet = getItem(position);
         holder.binding.tvCoinLabel.setText(wallet.coin().symbol());
-        holder.binding.tvCurrencyWallet.setText(priceFormatter.format(wallet.balance()));
+        holder.binding.tvCurrencyWallet.setText(balanceFormatter.format(wallet));
+        final double balance = wallet.balance() * wallet.coin().price();
+        holder.binding.tvCurrencyWallet2.setText(priceFormatter.format(wallet.coin().currencyCode(), balance));
+        imageLoader
+                .load(BuildConfig.IMG_ENDPOINT + wallet.coin().id() + ".png")
+                .into(holder.binding.ivWalletLogo);
     }
+
+
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         inflater = LayoutInflater.from(recyclerView.getContext());
     }
-//
-//    @Override
-//    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-//        super.onDetachedFromRecyclerView(recyclerView);
-//    }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        final ItemWalletBinding binding;
 
-        ViewHolder(ItemWalletBinding binding) {
+        private final ItemWalletBinding binding;
+
+        ViewHolder(@NonNull ItemWalletBinding binding) {
             super(binding.getRoot());
+            binding.getRoot().setClipToOutline(true);
+            OutlineCircle.apply(binding.ivWalletLogo);
             this.binding = binding;
         }
+
     }
+
 }

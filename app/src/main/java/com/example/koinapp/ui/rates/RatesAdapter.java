@@ -93,9 +93,8 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
 
     @Override
     public long getItemId(int position) {
-        return super.getItemId(position);
+        return getItem(position).id();
     }
-
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -112,7 +111,7 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
 
         private final ItemRatesBinding binding;
 
-        public ViewHolder(@NonNull ItemRatesBinding binding) {
+        ViewHolder(@NonNull ItemRatesBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
             OutlineCircle.apply(binding.coinIcon);

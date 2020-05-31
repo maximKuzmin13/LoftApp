@@ -59,9 +59,10 @@ public abstract class DataModule {
         if (BuildConfig.DEBUG) {
             return Room.inMemoryDatabaseBuilder(context, KoinDatabase.class).build();
         } else {
-            return Room.databaseBuilder(context, KoinDatabase.class, "koin.db").build();
+            return Room.databaseBuilder(context, KoinDatabase.class, "loft.db").build();
         }
     }
+
     @Binds
     abstract CoinReposytory coinReposytory(CoinReposytoryImpl impl);
 

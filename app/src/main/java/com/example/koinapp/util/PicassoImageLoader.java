@@ -28,7 +28,7 @@ class PicassoImageLoader implements ImageLoader {
 
         private RequestCreator request;
 
-        public PicassoImageRequest(RequestCreator request) {
+        PicassoImageRequest(RequestCreator request) {
 
             this.request = request;
         }

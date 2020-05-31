@@ -22,7 +22,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 
 @Module
-public abstract class DaggerModule {
+abstract class DaggerModule {
 
     @Singleton
     @Provides

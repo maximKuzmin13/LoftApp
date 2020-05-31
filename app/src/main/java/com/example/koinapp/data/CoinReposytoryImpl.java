@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import timber.log.Timber;
 
 @Singleton
 public class CoinReposytoryImpl implements CoinReposytory {
@@ -33,26 +34,43 @@ public class CoinReposytoryImpl implements CoinReposytory {
     @NonNull
     @Override
     public Observable<List<Coin>> listings(@NonNull Query query) {
-
-        return Observable.fromCallable(() -> query.forceUpdate() || db.coins().coinsCount() == 0)
+        return Observable
+                .fromCallable(() -> query.forceUpdate() || db.coins().coinsCount() == 0)
                 .switchMap((f) -> f ? api.listings(query.currency()) : Observable.empty())
-                .map(listings -> mapToRoomCoins(query, listings.data()))
+                .map((listings) -> mapToRoomCoins(query, listings.data()))
                 .doOnNext((coins) -> db.coins().insert(coins))
                 .switchMap((coins) -> fetchFromDb(query))
                 .switchIfEmpty(fetchFromDb(query))
                 .<List<Coin>>map(Collections::unmodifiableList)
-                .subscribeOn(shedulers.io())
-                ;
+                .subscribeOn(shedulers.io());
     }
 
     @NonNull
     @Override
     public Single<Coin> coin(@NonNull Currency currency, long id) {
         return listings(Query.builder().currency(currency.code()).forceUpdate(false).build())
-                .switchMapSingle((coins) -> db.coins().fetchOne(id))
                 .firstOrError()
+                .flatMap((coins) -> db.coins().fetchOne(id))
                 .map((coin) -> coin);
+    }
 
+    @NonNull
+    @Override
+    public Single<Coin> nextPopularCoin(@NonNull Currency currency, List<Integer> ids) {
+        return listings(Query.builder().currency(currency.code()).forceUpdate(false).build())
+                .firstOrError()
+                .doOnSuccess((c) -> Timber.d("%s", c.size()))
+                .flatMap((coins) -> db.coins().nextPopularCoin(ids))
+                .map((coin) -> coin);
+    }
+
+
+    @NonNull
+    @Override
+    public Observable<List<Coin>> topCoins(@NonNull Currency currency) {
+        return listings(Query.builder().currency(currency.code()).forceUpdate(false).build())
+                .switchMap((coins) -> db.coins().fetchTop(3))
+                .map(Collections::unmodifiableList);
     }
 
     private Observable<List<RoomCoin>> fetchFromDb(Query query) {

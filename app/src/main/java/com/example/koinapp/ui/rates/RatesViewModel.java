@@ -9,6 +9,7 @@ import com.example.koinapp.data.CurrencyRepository;
 import com.example.koinapp.data.SortBy;
 import com.example.koinapp.util.RxShedulers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,9 +17,10 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
-public class RatesViewModel extends ViewModel {
+class RatesViewModel extends ViewModel {
     private final Subject<Boolean> isRefreshing = BehaviorSubject.create();
     private final Subject<Class<?>> pullToRefresh = BehaviorSubject.createDefault(Void.TYPE);
     private final Observable<List<Coin>> coins;
@@ -26,6 +28,8 @@ public class RatesViewModel extends ViewModel {
     private final AtomicBoolean forceUpdate = new AtomicBoolean();
     private int sortingIndex = 1;
     private final RxShedulers shedulers;
+    private final Subject<Throwable> error = PublishSubject.create();
+    private final Subject<Class<?>> onRetry = PublishSubject.create();
 
     @Inject
     RatesViewModel(CoinReposytory coinReposytory, CurrencyRepository currencyRepository, RxShedulers shedulers) {
@@ -39,8 +43,12 @@ public class RatesViewModel extends ViewModel {
                         .switchMap((qb) -> sortBy.map(qb::sortBy))
                         .map((qb) -> qb.forceUpdate(forceUpdate.getAndSet(false)))
                         .map(CoinReposytory.Query.Builder::build)
-                        .switchMap(coinReposytory::listings)
-                        .doOnEach((ntf) -> isRefreshing.onNext(false));
+                        .switchMap((q) -> coinReposytory.listings(q)
+                                .doOnError(error::onNext)
+                                .onErrorReturnItem(Collections.emptyList()))
+                        .doOnEach((ntf) -> isRefreshing.onNext(false))
+                        .replay()
+                        .autoConnect();
 
     }
 
@@ -58,7 +66,16 @@ public class RatesViewModel extends ViewModel {
         pullToRefresh.onNext(Void.TYPE);
     }
 
+    @NonNull
+    Observable<Throwable> onError() {
+        return error.observeOn(shedulers.main());
+    }
+
     void switchSortingOrder() {
         sortBy.onNext(SortBy.values()[sortingIndex++ % SortBy.values().length]);
+    }
+
+    void retry() {
+        onRetry.onNext(Void.class);
     }
 }
